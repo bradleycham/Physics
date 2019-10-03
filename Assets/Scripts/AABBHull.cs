@@ -13,6 +13,8 @@ public class AABBHull : CollisionHull2D
     private void Start()
     {
         hull = hullType.AABB;
+        GameObject.Find("CollisionManager").GetComponent<CollisionManager>().AddCollisionHull(this);
+
     }
     private void Update()
     {

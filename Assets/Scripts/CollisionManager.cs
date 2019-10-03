@@ -5,50 +5,102 @@ using UnityEngine;
 public class CollisionManager : MonoBehaviour
 {
     // Start is called before the first frame update
-    public struct potentialCollision
+    
+    public class PotentialCollision
     {
-        public potentialCollision(CollisionHull2D newHull1, CollisionHull2D newHull2)
+        CollisionHull2D hull1;
+        CollisionHull2D hull2;
+        public PotentialCollision(CollisionHull2D newHull1, CollisionHull2D newHull2)
         {
             hull1 = newHull1;
             hull2 = newHull2;
         }
-        CollisionHull2D hull1;
-        CollisionHull2D hull2;
     }
-
-    public List<CollisionHull2D> allColliders;
-    public List<potentialCollision> potentialCollisions;
+    
+    PotentialCollision potCol = new PotentialCollision(null, null);
+    public List<CollisionHull2D> allColliders = new List<CollisionHull2D>();
+    public List<PotentialCollision> potentialCollisions = new List<PotentialCollision>();
     public float distanceCheckRadius;
     void Start()
     {
-        
+    
     }
 
-    // Update is called once per frame
-    void Update()
+// Update is called once per frame
+void Update()
     {
         for (int i = 0; i < allColliders.Count; i ++)
         {
+            allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.red;
+
             for (int j = 0; j < allColliders.Count; j++)
             {
-                if(allColliders[i] != allColliders[j])
+                if (i != j)
                 {
                     Vector3 range = allColliders[j].transform.position - allColliders[i].transform.position;
-                    if (range.magnitude - distanceCheckRadius * 2 < 0)
+                    if (range.magnitude - (distanceCheckRadius * 2) < 0)
                     {
-                        potentialCollision potCol = new potentialCollision(allColliders[i], allColliders[j]);
-                        if (potentialCollisions.Contains(potCol))
-                        {
-                            potentialCollisions.Add(potCol);
-                        }
+                        // alternatively you could just add the collisions to a list and operate on them in another loop
+
+                        if (allColliders[i].hull == CollisionHull2D.hullType.CIRCLE && allColliders[j].hull == CollisionHull2D.hullType.CIRCLE)
+                            if(allColliders[i].CircleCircleCollision(allColliders[j].GetComponentInParent<CircleHull>()))
+                            {
+                                //collision occured
+                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                            }
                         
-                        //potentialCollisions.Add(allColliders[i]);
-                        //potentialCollisions.Add(allColliders[j]);
+                        if (allColliders[i].hull == CollisionHull2D.hullType.CIRCLE && allColliders[j].hull == CollisionHull2D.hullType.AABB)
+                            if (allColliders[i].CircleAABBCollision(allColliders[j].GetComponentInParent<AABBHull>()))
+                            {
+                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                            }
+                        /*
+                        if (allColliders[i].hull == CollisionHull2D.hullType.CIRCLE && allColliders[j].hull == CollisionHull2D.hullType.OBB)
+                            if(allColliders[i].CircleOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
+                            {
+
+                            }
+                        */
+                        if (allColliders[i].hull == CollisionHull2D.hullType.AABB && allColliders[j].hull == CollisionHull2D.hullType.AABB)
+                            if (allColliders[i].AABBAABBCollision(allColliders[j].GetComponentInParent<AABBHull>()))
+                            {
+                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                            }
+                            /*
+                        if (allColliders[i].hull == CollisionHull2D.hullType.AABB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
+                            if (allColliders[i].AABBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
+                            {
+
+                            }
+                        if (allColliders[i].hull == CollisionHull2D.hullType.OBB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
+                            if (allColliders[i].OBBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
+                            {
+
+                            }
+                            */
+
+
+                        //potCol = new PotentialCollision(allColliders[i], allColliders[j]);
+
+                        //if (!potentialCollisions.)
+                        //{
+                        //   potentialCollisions.Add(potCol);
+                        //} 
+
                     }
-                }
-                
+                }  
             }
         }
+        /*
+        for (int k = 0; k < potentialCollisions.Count; k++)
+        {
+           potentialCollisions[k].
+        }
+        */
+        Debug.Log(potentialCollisions.Count);
     }
 
     public void AddCollisionHull(CollisionHull2D hull)
