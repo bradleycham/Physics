@@ -105,8 +105,6 @@ public class Particle2D : MonoBehaviour
     {
         acceleration.x = -Mathf.Sin(Time.time) * speed;
         acceleration.y = Mathf.Cos(Time.time) * speed;
-        //velocity.x = Mathf.Cos(Time.time) * speed;
-        //velocity.y = Mathf.Sin(Time.time) * speed;
     }
 
     void Oscillate()

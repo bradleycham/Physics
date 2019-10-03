@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CircleScript : MonoBehaviour
+public class OBBHull : CollisionHull2D
 {
-
-    public Vector2 initialVelocity;
-    public Vector2 initialAcceleration;
     // Start is called before the first frame update
     void Start()
     {
-        
+        hull = hullType.OBB;
     }
 
     // Update is called once per frame
