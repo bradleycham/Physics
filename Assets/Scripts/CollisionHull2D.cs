@@ -47,7 +47,8 @@ public class CollisionHull2D : MonoBehaviour
 
     public bool/*HullCollision*/ CircleCircleCollision(CircleHull circleHull)
     {
-        Vector3 range = circleHull.transform.position - this.transform.position;
+        Vector2 range = circleHull.transform.position - this.transform.position;
+        range -= this.GetComponent<CircleHull>().offset;
         float overlap = range.magnitude - circleHull.radius * 2;
         //HullCollision returnCollision;
         if (overlap > 0)
@@ -66,7 +67,7 @@ public class CollisionHull2D : MonoBehaviour
     {
         Vector2 closestPoint = new Vector2(0.0f, 0.0f);
         Vector2 distance = boxHull.gameObject.transform.position - this.gameObject.transform.position;
-        distance += this.GetComponent<CircleHull>().offset;
+        distance -= this.GetComponent<CircleHull>().offset;
 
         closestPoint = new Vector2(Mathf.Clamp(distance.x, -boxHull.halfX, boxHull.halfX), Mathf.Clamp(distance.y, -boxHull.halfY, boxHull.halfY));
 
@@ -75,9 +76,14 @@ public class CollisionHull2D : MonoBehaviour
         else return false;
     }
     /*
-    public bool CircleOBBCollision(OBBHull bBHull)
+    public bool CircleOBBCollision(OBBHull OBBHull)
     {
+        Vector2 thisUpNormal = getUpNormal(this.GetComponent<OBBHull>().currentRotation);
+        Vector2 thisRightNormal = getRightNormal(this.GetComponent<OBBHull>().currentRotation);
+        Vector2 otherUpNormal = getUpNormal(OBBHull.currentRotation);
+        Vector2 otherRightNormal = getRightNormal(OBBHull.currentRotation);
 
+        
     }
     */
     public bool AABBAABBCollision(AABBHull boxHull)
@@ -103,5 +109,18 @@ public class CollisionHull2D : MonoBehaviour
     {
 
     }
+    
     */
+    Vector2 getUpNormal(float theta)
+    {
+        return new Vector2(Mathf.Cos(theta), -Mathf.Sin(theta));
+    }
+
+    Vector2 getRightNormal(float theta)
+    {
+        return new Vector2(Mathf.Sin(theta), Mathf.Cos(theta));
+    }
+
+    //void SatTest(Vector2 axis, )
+
 }

@@ -35,7 +35,7 @@ void Update()
 
             for (int j = 0; j < allColliders.Count; j++)
             {
-                if (i != j)
+                if (i != j && allColliders[i].gameObject != allColliders[j].gameObject)
                 {
                     Vector3 range = allColliders[j].transform.position - allColliders[i].transform.position;
                     if (range.magnitude - (distanceCheckRadius * 2) < 0)
