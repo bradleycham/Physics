@@ -20,6 +20,6 @@ public class OBBHull : CollisionHull2D
     // Update is called once per frame
     void Update()
     {
-        currentRotation = gameObject.transform.rotation.z + startingRotation;
+       currentRotation = this.gameObject.transform.eulerAngles.z + startingRotation;
     }
 }

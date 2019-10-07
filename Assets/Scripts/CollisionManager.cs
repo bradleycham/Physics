@@ -75,12 +75,14 @@ void Update()
                             {
 
                             }
+                            */
                         if (allColliders[i].hull == CollisionHull2D.hullType.OBB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
                             if (allColliders[i].OBBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
                             {
-
+                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
                             }
-                            */
+                            
 
 
                         //potCol = new PotentialCollision(allColliders[i], allColliders[j]);
@@ -100,7 +102,7 @@ void Update()
            potentialCollisions[k].
         }
         */
-        Debug.Log(potentialCollisions.Count);
+        //Debug.Log(potentialCollisions.Count);
     }
 
     public void AddCollisionHull(CollisionHull2D hull)
