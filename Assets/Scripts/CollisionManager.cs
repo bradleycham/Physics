@@ -69,13 +69,15 @@ void Update()
                                 allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
                                 allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
                             }
-                            /*
+                            
                         if (allColliders[i].hull == CollisionHull2D.hullType.AABB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
                             if (allColliders[i].AABBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
                             {
-
+                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                                //Debug.Log("AABB OBB COLISION");
                             }
-                            */
+                            
                         if (allColliders[i].hull == CollisionHull2D.hullType.OBB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
                             if (allColliders[i].OBBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
                             {

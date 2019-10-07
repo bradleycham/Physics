@@ -97,12 +97,46 @@ public class CollisionHull2D : MonoBehaviour
                 return true;
         return false;
     }
-    /*
+    
     public bool AABBOBBCollision(OBBHull boxHull)
     {
+        shape1Corners = new Vector2[4];
+        shape2Corners = new Vector2[4];
+        Vector2[] normals = new Vector2[4];
+        float[] shape1MinMax = new float[2];
+        float[] shape2MinMax = new float[2];
 
+        AABBHull staticHull = this.GetComponent<AABBHull>();
+
+        shape1Corners[0] = staticHull.transform.position + new Vector3(-staticHull.halfX, -staticHull.halfY);
+        shape1Corners[1] = staticHull.transform.position + new Vector3(-staticHull.halfX, staticHull.halfY);
+        shape1Corners[2] = staticHull.transform.position + new Vector3(staticHull.halfX, -staticHull.halfY);
+        shape1Corners[3] = staticHull.transform.position + new Vector3(staticHull.halfX, staticHull.halfY);
+        shape2Corners = getRotatedCorners(boxHull);
+
+        normals[0] = getUpNormal(-staticHull.transform.eulerAngles.z);
+        normals[1] = getRightNormal(-staticHull.transform.eulerAngles.z);
+        normals[2] = getUpNormal(-boxHull.currentRotation);
+        normals[3] = getRightNormal(-boxHull.currentRotation);
+
+        for (int i = 0; i < normals.Length; i ++ )
+        {
+            //Debug.Log("testing corner" + i);
+
+            shape1MinMax = SatTest(normals[i], shape1Corners);
+            shape2MinMax = SatTest(normals[i], shape2Corners);
+            if (!Overlap(shape1MinMax[0], shape1MinMax[1], shape2MinMax[0], shape2MinMax[1]))
+            {
+                //Debug.Log("falure");
+
+                return false;
+
+            }
+        }
+
+        return true;
     }
-    */
+    
     public bool OBBOBBCollision(OBBHull boxHull)
     {
         shape1Corners = new Vector2[4];
@@ -114,10 +148,6 @@ public class CollisionHull2D : MonoBehaviour
         shape1Corners = getRotatedCorners(this.GetComponent<OBBHull>());
         shape2Corners = getRotatedCorners(boxHull);
 
-        //normals[0] = getUpNormal(this.GetComponent<OBBHull>().currentRotation);
-        //normals[1] = getRightNormal(this.GetComponent<OBBHull>().currentRotation);
-        //normals[2] = getUpNormal(boxHull.currentRotation);
-        //normals[3] = getRightNormal(boxHull.currentRotation);
         normals[0] = getUpNormal(-this.GetComponent<OBBHull>().currentRotation);
         normals[1] = getRightNormal(-this.GetComponent<OBBHull>().currentRotation);
         normals[2] = getUpNormal(-boxHull.currentRotation);
