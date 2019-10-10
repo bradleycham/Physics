@@ -5,7 +5,7 @@ using UnityEngine;
 public class CollisionManager : MonoBehaviour
 {
     // Start is called before the first frame update
-    
+    /*
     public class PotentialCollision
     {
         CollisionHull2D hull1;
@@ -16,14 +16,16 @@ public class CollisionManager : MonoBehaviour
             hull2 = newHull2;
         }
     }
-    
-    PotentialCollision potCol = new PotentialCollision(null, null);
+    */
+    //PotentialCollision potCol = new PotentialCollision(null, null);
     public List<CollisionHull2D> allColliders = new List<CollisionHull2D>();
-    public List<PotentialCollision> potentialCollisions = new List<PotentialCollision>();
-    public float distanceCheckRadius;
+    public List<CollisionHull2D.HullCollision> Collisions = new List<CollisionHull2D.HullCollision>();
+    public List<string> currentCollisions;
+    public float distanceCheckRadius = 2;
+    bool collisionHappened;
     void Start()
     {
-    
+        collisionHappened = false;
     }
 
 // Update is called once per frame
@@ -41,20 +43,21 @@ void Update()
                     if (range.magnitude - (distanceCheckRadius * 2) < 0)
                     {
                         // alternatively you could just add the collisions to a list and operate on them in another loop
+                        CollisionHull2D.HullCollision newCollision = new CollisionHull2D.HullCollision();
 
                         if (allColliders[i].hull == CollisionHull2D.hullType.CIRCLE && allColliders[j].hull == CollisionHull2D.hullType.CIRCLE)
-                            if(allColliders[i].CircleCircleCollision(allColliders[j].GetComponentInParent<CircleHull>()))
-                            {
-                                //collision occured
-                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
-                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
-                            }
-                        
+                        {
+                            newCollision = CollisionHull2D.CircleCircleCollision(allColliders[i].GetComponent<CircleHull>(), allColliders[j].GetComponent<CircleHull>());
+                            collisionHappened = newCollision.status;
+                            //if (newCollision.status)
+                                //CollisionHull2D.ResolveCollision(newCollision);
+
+                        }
+
                         if (allColliders[i].hull == CollisionHull2D.hullType.CIRCLE && allColliders[j].hull == CollisionHull2D.hullType.AABB)
                             if (allColliders[i].CircleAABBCollision(allColliders[j].GetComponentInParent<AABBHull>()))
                             {
-                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
-                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                                collisionHappened = true;
                             }
                         /*
                         if (allColliders[i].hull == CollisionHull2D.hullType.CIRCLE && allColliders[j].hull == CollisionHull2D.hullType.OBB)
@@ -64,47 +67,60 @@ void Update()
                             }
                         */
                         if (allColliders[i].hull == CollisionHull2D.hullType.AABB && allColliders[j].hull == CollisionHull2D.hullType.AABB)
-                            if (allColliders[i].AABBAABBCollision(allColliders[j].GetComponentInParent<AABBHull>()))
-                            {
-                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
-                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
-                            }
-                            
+                        {
+                            newCollision = CollisionHull2D.AABBAABBCollision(allColliders[i].GetComponent<AABBHull>(), allColliders[j].GetComponent<AABBHull>());
+                            collisionHappened = newCollision.status;
+                            //Debug.Log(newCollision.status);
+                            //if(newCollision.status)
+                                //CollisionHull2D.ResolveCollision(newCollision);
+
+                        }
+
                         if (allColliders[i].hull == CollisionHull2D.hullType.AABB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
                             if (allColliders[i].AABBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
                             {
-                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
-                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
-                                //Debug.Log("AABB OBB COLISION");
+                                collisionHappened = true;
                             }
                             
                         if (allColliders[i].hull == CollisionHull2D.hullType.OBB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
                             if (allColliders[i].OBBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
                             {
-                                allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
-                                allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                                collisionHappened = true;
                             }
-                            
 
 
-                        //potCol = new PotentialCollision(allColliders[i], allColliders[j]);
-
-                        //if (!potentialCollisions.)
-                        //{
-                        //   potentialCollisions.Add(potCol);
-                        //} 
-
+                        if (collisionHappened)
+                        {
+                            if(newCollision.status)
+                            {
+                                //currentCollisions.Add();
+                                bool duplicate = false;
+                                for(int h = 0; h < Collisions.Count; h++)
+                                {
+                                    if ((newCollision.a == Collisions[h].a || newCollision.a == Collisions[h].b) && (newCollision.b == Collisions[h].a || newCollision.b == Collisions[h].b))
+                                    {
+                                        Debug.Log("duplicate");
+                                        duplicate = true;
+                                    }
+                                }
+                                if(!duplicate)
+                                    Collisions.Add(newCollision);
+                            }
+                            allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                            allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;
+                        }
+                        collisionHappened = false;
                     }
                 }  
             }
         }
-        /*
-        for (int k = 0; k < potentialCollisions.Count; k++)
+        
+        for (int k = 0; k < Collisions.Count; k++)
         {
-           potentialCollisions[k].
+            CollisionHull2D.ResolveCollision(Collisions[k]);
         }
-        */
-        //Debug.Log(potentialCollisions.Count);
+        
+        Collisions.Clear();
     }
 
     public void AddCollisionHull(CollisionHull2D hull)

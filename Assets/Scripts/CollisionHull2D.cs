@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class CollisionHull2D : MonoBehaviour
 {
-    private Vector2 min0, max0, min1, max1;
+    
     public Vector2[] shape1Corners;
     public Vector2[] shape2Corners;
-
+    public float restitution;
 
     public class HullCollision
     {
         public struct Contact
         {
-            Vector2 point;
-            Vector2 normal;
-            float restitution;
+            public Vector2 point;
+            public Vector2 normal;
+            public float restitution;
         }
 
         public Vector2 closingVelocity;
@@ -23,7 +23,7 @@ public class CollisionHull2D : MonoBehaviour
         public CollisionHull2D a;
         public CollisionHull2D b;
         public Contact[] contacts = new Contact[4];
-        bool status;
+        public bool status;
     }
     
     private bool colliding;
@@ -48,22 +48,93 @@ public class CollisionHull2D : MonoBehaviour
         
     }
 
-    public bool/*HullCollision*/ CircleCircleCollision(CircleHull circleHull)
+    public static HullCollision CircleCircleCollision(CircleHull circleHull1, CircleHull circleHull2)
     {
-        Vector2 range = circleHull.transform.position - this.transform.position;
-        range -= this.GetComponent<CircleHull>().offset;
-        float overlap = range.magnitude - circleHull.radius * 2;
-        //HullCollision returnCollision;
+        Vector3 c1Offset = circleHull1.offset;
+        Vector3 c2Offset = circleHull2.offset;
+
+        Vector2 range = (circleHull2.transform.position + c2Offset) - (circleHull1.transform.position + c1Offset); // make sure offsets arent screwing things up
+        float overlap = (circleHull2.radius + circleHull1.radius) - range.magnitude;
+
+        HullCollision col = new HullCollision();
+        col.a = circleHull1;
+        col.b = circleHull2;
+        col.penetration = range * overlap;
+
+        HullCollision.Contact con0 = new HullCollision.Contact();
+        con0.point = range.normalized * circleHull1.radius;
+        con0.normal = range.normalized;
+        con0.restitution = Mathf.Min(circleHull1.restitution, circleHull2.restitution);
+
+        col.contacts[0] = con0;
+
+        Particle2D c1 = circleHull1.GetComponentInParent<Particle2D>();
+        Particle2D c2 = circleHull2.GetComponentInParent<Particle2D>();
+
+        //this section may need tweaking
+        /*
+        Vector3 c1Closing = new Vector3(Mathf.Clamp(c1.velocity.x, 0, range.normalized.x), Mathf.Clamp(c1.velocity.y, 0, range.normalized.y));
+        Vector3 c2Closing = new Vector3(Mathf.Clamp(c2.velocity.x, 0, -range.normalized.x), Mathf.Clamp(c2.velocity.y, 0, -range.normalized.y));
+        Vector3 closingVel = c1Closing - c2Closing;
+        col.closingVelocity = closingVel;
+        */
+        Vector3 closingVel = c2.velocity - c1.velocity; // started as c1 -c2
+        col.closingVelocity = closingVel;
+
         if (overlap > 0)
         {
-            colliding = false;
-            return false;
+            col.status = true;
+            //ResolveCollision(col);
+            return col;
         }
         else
         {
-            colliding = true;
-            return true;
+            col.status = false;
+            return col;
         }
+    }
+
+    public static void ResolveCollision(HullCollision col)
+    {
+        Particle2D A = col.a.GetComponent<Particle2D>();
+        Particle2D B = col.b.GetComponent<Particle2D>();
+        float invAMass;
+        float invBMass;
+        if (A.mass == 0) invAMass = 0;
+        else invAMass = 1 / A.mass;
+        if (B.mass == 0) invBMass = 0;
+        else invBMass = 1 / B.mass;
+
+
+        float velAlongNormal = Vector3.Dot(col.closingVelocity, col.contacts[0].normal);
+        Debug.Log("velAlongNormal " + velAlongNormal);
+
+        if (velAlongNormal > 0) return; // > makes square work properly
+        //Debug.Log(velAlongNormal);
+        // restitustion
+        float e = col.contacts[0].restitution;
+        // impulse scalar
+        float j = -(1 + e) * velAlongNormal;
+        j /= invAMass + invBMass;
+        //Debug.Log(j);
+
+        Vector2 impulse = j * col.contacts[0].normal;
+        Debug.Log(impulse);
+
+        //A.velocity = new Vector3(0.0f, 0.0f, 0.0f);
+        //B.velocity = new Vector3(0.0f, 0.0f, 0.0f);
+
+        A.velocity += invAMass * impulse;
+        B.velocity -= invBMass * impulse;
+
+        // Positional Correction
+        
+        float percent = 0.2f;
+        float slop = 0.01f;
+        Vector2 correction = Mathf.Max(velAlongNormal - slop, 0) / (invAMass + invBMass) * percent * col.contacts[0].normal;
+        A.position -= invAMass * correction;
+        B.position += invBMass * correction;
+        
     }
 
     public bool CircleAABBCollision(AABBHull boxHull)
@@ -84,18 +155,59 @@ public class CollisionHull2D : MonoBehaviour
         
     }
     */
-    public bool AABBAABBCollision(AABBHull boxHull)
+    public static HullCollision AABBAABBCollision(AABBHull boxHull1, AABBHull boxHull2)
     {
-        AABBHull thisHull = this.GetComponent<AABBHull>();
-        min0 = thisHull.transform.position - new Vector3(thisHull.halfX, thisHull.halfY) + thisHull.offset;
-        max0 = thisHull.transform.position + new Vector3(thisHull.halfX, thisHull.halfY) + thisHull.offset;
-        min1 = boxHull.transform.position - new Vector3(thisHull.halfX, thisHull.halfY) + boxHull.offset;
-        max1 = boxHull.transform.position + new Vector3(thisHull.halfX, thisHull.halfY) + boxHull.offset;
+        Vector2 min0, max0, min1, max1;
+        Vector3 b1Offset = boxHull1.offset;
+        Vector3 b2Offset = boxHull2.offset;
+        Particle2D A = boxHull1.GetComponent<Particle2D>();
+        Particle2D B = boxHull2.GetComponent<Particle2D>();
+
+        min0 = boxHull1.transform.position - new Vector3(boxHull1.halfX, boxHull1.halfY) + b1Offset;
+        max0 = boxHull1.transform.position + new Vector3(boxHull1.halfX, boxHull1.halfY) + b1Offset;
+        min1 = boxHull2.transform.position - new Vector3(boxHull2.halfX, boxHull2.halfY) + b2Offset;
+        max1 = boxHull2.transform.position + new Vector3(boxHull2.halfX, boxHull2.halfY) + b2Offset;
+
+        Vector2 range = (boxHull2.transform.position + b2Offset) - (boxHull1.transform.position + b1Offset); // make sure offsets arent screwing things up
+
+        HullCollision col = new HullCollision();
+        col.a = boxHull1;
+        col.b = boxHull2;
+
+        float xOverlap = boxHull1.halfX + boxHull2.halfX - Mathf.Abs(range.x);
+        float yOverlap = boxHull1.halfY + boxHull2.halfY - Mathf.Abs(range.y);
+
+        //TRANSPORTATION
+        // TRANSPORTATION
+        
 
         if (max0.x >= min1.x && max1.x >= min0.x)
             if (max0.y >= min1.y && max1.y >= min0.y)
-                return true;
-        return false;
+            {
+                col.status = true;
+                Vector2 collisionNormal = new Vector2();
+                if (Mathf.Abs(xOverlap) > Mathf.Abs(yOverlap))//added mathf
+                    collisionNormal = boxHull1.getRightNormal(180) * (range.x / Mathf.Abs(range.x));
+                if (Mathf.Abs(yOverlap) > Mathf.Abs(xOverlap))//added mathf
+                    collisionNormal = boxHull1.getUpNormal(180) * (range.y / Mathf.Abs(range.y));
+                Debug.Log(collisionNormal);
+                col.penetration = new Vector2(xOverlap, yOverlap);
+
+                Vector3 closingVel = A.velocity - B.velocity;
+                //Vector3 closingVel = B.velocity - A.velocity;
+                col.closingVelocity = closingVel;
+
+                HullCollision.Contact con0 = new HullCollision.Contact();
+                con0.point = new Vector2(Mathf.Clamp(range.x, -boxHull1.halfX, boxHull1.halfX), Mathf.Clamp(range.y, -boxHull1.halfY, boxHull1.halfY));
+                con0.normal = collisionNormal;
+                con0.restitution = Mathf.Min(boxHull1.restitution, boxHull2.restitution);
+                col.contacts[0] = con0;
+                //ResolveCollision(col);
+            }
+            else col.status = false;
+        //ResolveCollision(col);
+        return col;
+        // end of or      
     }
     
     public bool AABBOBBCollision(OBBHull boxHull)

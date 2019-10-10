@@ -120,7 +120,7 @@ public class Particle2D : MonoBehaviour
         if (Shape == shape.rect)
             invInertia = (1 / 12) * mass * ((pointOfForce.x * pointOfForce.x) + (pointOfForce.y * pointOfForce.y));
         else if (Shape == shape.circle)
-            invInertia = (1 / 2) * mass * GetComponent<SphereCollider>().radius* GetComponent<SphereCollider>().radius; // *radius squared
+            invInertia = (1 / 2) * mass * GetComponent<CircleHull>().radius* GetComponent<CircleHull>().radius; // *radius squared
         torque = Vector3.Cross(pointOfForce, newForce).z;
         angularVelocity += torque;
 

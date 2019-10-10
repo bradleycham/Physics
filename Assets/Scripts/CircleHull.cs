@@ -6,6 +6,7 @@ public class CircleHull : CollisionHull2D
 {
     // Start is called before the first frame update
     public float radius;
+    //public float restitution;
     public Vector2 offset;
 
     void Start()
