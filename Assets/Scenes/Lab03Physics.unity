@@ -149,7 +149,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 338061264}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01c6d03bbfdc0be4b9357f2dbb6dc095, type: 3}
+  m_Script: {fileID: 11500000, guid: eb77be65313cb3b4cafa681d69304578, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 0
@@ -163,8 +163,8 @@ MonoBehaviour:
   angularAcceleration: 0
   invInertia: 0
   torque: 0
-  applyForce: {x: 0, y: 0}
-  positionOfForce: {x: 0, y: 0}
+  applyForce: {x: 10, y: 0}
+  positionOfForce: {x: -0.5, y: 0.5}
   Shape: 1
   circulation: 0
   verticalOscillate: 0
@@ -175,7 +175,7 @@ MonoBehaviour:
   staticFriction: 0
   isSliding: 0
   isSpring: 0
-  mass: 0
+  mass: 1
 --- !u!135 &338061266
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -278,7 +278,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 993743888}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01c6d03bbfdc0be4b9357f2dbb6dc095, type: 3}
+  m_Script: {fileID: 11500000, guid: eb77be65313cb3b4cafa681d69304578, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 0
@@ -294,7 +294,7 @@ MonoBehaviour:
   torque: 0
   applyForce: {x: 0, y: 0}
   positionOfForce: {x: 0, y: 0}
-  Shape: 0
+  Shape: 1
   circulation: 0
   verticalOscillate: 0
   horizontalOscillate: 0

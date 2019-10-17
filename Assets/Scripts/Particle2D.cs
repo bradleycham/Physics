@@ -6,11 +6,11 @@ public class Particle2D : MonoBehaviour
 {
     public float speed;
 
-    public Vector2 position;
-    public Vector2 velocity;
-    public Vector2 acceleration;
-    public Vector2 force;
-    public Vector2 norm;
+    public Vector3 position;
+    public Vector3 velocity;
+    public Vector3 acceleration;
+    public Vector3 force;
+    public Vector3 norm;
 
     public float angle;
     public float angularVelocity;
@@ -19,8 +19,8 @@ public class Particle2D : MonoBehaviour
     public float invInertia;
     public float torque;
 
-    public Vector2 applyForce;
-    public Vector2 positionOfForce;
+    public Vector3 applyForce;
+    public Vector3 positionOfForce;
 
     public enum shape
     {
@@ -65,7 +65,7 @@ public class Particle2D : MonoBehaviour
         }
     }
 
-    private void AddForce(Vector2 newForce)
+    private void AddForce(Vector3 newForce)
     {
         force += newForce;
     }
@@ -74,7 +74,7 @@ public class Particle2D : MonoBehaviour
     public void UpdateAcceleration()
     {
         acceleration = force * invMass;
-        force.Set(0.0f, 0.0f);
+        force.Set(0.0f, 0.0f, 0.0f);
     }
     void updatePositionEulerExplicit(float deltaTime)
     {

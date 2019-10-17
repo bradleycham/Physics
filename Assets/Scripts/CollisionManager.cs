@@ -31,10 +31,12 @@ public class CollisionManager : MonoBehaviour
 // Update is called once per frame
 void Update()
     {
+        for(int spaghetti = 0; spaghetti < allColliders.Count; spaghetti ++)
+        {
+            allColliders[spaghetti].gameObject.GetComponent<Renderer>().material.color = Color.red;
+        }
         for (int i = 0; i < allColliders.Count; i ++)
         {
-            allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.red;
-
             for (int j = 0; j < allColliders.Count; j++)
             {
                 if (i != j && allColliders[i].gameObject != allColliders[j].gameObject)
@@ -48,45 +50,41 @@ void Update()
                         if (allColliders[i].hull == CollisionHull2D.hullType.CIRCLE && allColliders[j].hull == CollisionHull2D.hullType.CIRCLE)
                         {
                             newCollision = CollisionHull2D.CircleCircleCollision(allColliders[i].GetComponent<CircleHull>(), allColliders[j].GetComponent<CircleHull>());
-                            collisionHappened = newCollision.status;
-                            //if (newCollision.status)
-                                //CollisionHull2D.ResolveCollision(newCollision);
-
+                            collisionHappened = newCollision.status;    
                         }
-
+                  
                         if (allColliders[i].hull == CollisionHull2D.hullType.CIRCLE && allColliders[j].hull == CollisionHull2D.hullType.AABB)
-                            if (allColliders[i].CircleAABBCollision(allColliders[j].GetComponentInParent<AABBHull>()))
-                            {
-                                collisionHappened = true;
-                            }
-                        /*
+                        {
+                            newCollision = CollisionHull2D.CircleAABBCollision(allColliders[i].GetComponent<CircleHull>(), allColliders[j].GetComponent<AABBHull>());
+                            collisionHappened = newCollision.status;
+                            //Debug.Log(newCollision.contacts[0].normal);
+                            //Debug.Log(newCollision.status);
+                            //Debug.Log(newCollision.contacts[0].normal);
+                            //Debug.Log(newCollision.contacts[0].point);
+                            //Debug.Log(newCollision.closingVelocity);
+                        }
                         if (allColliders[i].hull == CollisionHull2D.hullType.CIRCLE && allColliders[j].hull == CollisionHull2D.hullType.OBB)
-                            if(allColliders[i].CircleOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
-                            {
-
-                            }
-                        */
+                        {
+                            newCollision = CollisionHull2D.CircleOBBCollision(allColliders[i].GetComponent<CircleHull>(), allColliders[j].GetComponent<OBBHull>());
+                            collisionHappened = newCollision.status;
+                        }
                         if (allColliders[i].hull == CollisionHull2D.hullType.AABB && allColliders[j].hull == CollisionHull2D.hullType.AABB)
                         {
                             newCollision = CollisionHull2D.AABBAABBCollision(allColliders[i].GetComponent<AABBHull>(), allColliders[j].GetComponent<AABBHull>());
                             collisionHappened = newCollision.status;
-                            //Debug.Log(newCollision.status);
-                            //if(newCollision.status)
-                                //CollisionHull2D.ResolveCollision(newCollision);
-
                         }
-
+                        /*
                         if (allColliders[i].hull == CollisionHull2D.hullType.AABB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
                             if (allColliders[i].AABBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
                             {
                                 collisionHappened = true;
                             }
-                            
+                          */
                         if (allColliders[i].hull == CollisionHull2D.hullType.OBB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
-                            if (allColliders[i].OBBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
-                            {
-                                collisionHappened = true;
-                            }
+                        {
+                            newCollision = CollisionHull2D.OBBOBBCollision(allColliders[i].GetComponent<OBBHull>(), allColliders[j].GetComponent<OBBHull>());
+                            collisionHappened = newCollision.status;
+                        }
 
 
                         if (collisionHappened)
@@ -99,12 +97,17 @@ void Update()
                                 {
                                     if ((newCollision.a == Collisions[h].a || newCollision.a == Collisions[h].b) && (newCollision.b == Collisions[h].a || newCollision.b == Collisions[h].b))
                                     {
-                                        Debug.Log("duplicate");
                                         duplicate = true;
+
                                     }
                                 }
                                 if(!duplicate)
+                                {
+                                    //Debug.Log("contact normal");
+                                    //Debug.Log(newCollision.contacts[0].normal);
                                     Collisions.Add(newCollision);
+
+                                }
                             }
                             allColliders[i].gameObject.GetComponent<Renderer>().material.color = Color.green;
                             allColliders[j].gameObject.GetComponent<Renderer>().material.color = Color.green;

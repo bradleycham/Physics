@@ -22,11 +22,11 @@ public class AABBHull : CollisionHull2D
     }
     Vector2 getMinCorner()
     {
-        return this.transform.position + (offset - new Vector3(halfX, halfY));
+        return this.transform.position - new Vector3(halfX, halfY) + offset;
     }
 
     Vector2 getMaxCorner()
     {
-        return this.transform.position + (offset + new Vector3(halfX, halfY));
+        return this.transform.position + new Vector3(halfX, halfY) + offset;
     }
 }
