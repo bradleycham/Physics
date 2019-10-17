@@ -73,13 +73,16 @@ void Update()
                             newCollision = CollisionHull2D.AABBAABBCollision(allColliders[i].GetComponent<AABBHull>(), allColliders[j].GetComponent<AABBHull>());
                             collisionHappened = newCollision.status;
                         }
-                        /*
                         if (allColliders[i].hull == CollisionHull2D.hullType.AABB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
-                            if (allColliders[i].AABBOBBCollision(allColliders[j].GetComponentInParent<OBBHull>()))
-                            {
-                                collisionHappened = true;
-                            }
-                          */
+                        {
+                            newCollision = CollisionHull2D.AABBOBBCollision(allColliders[i].GetComponent<AABBHull>(), allColliders[j].GetComponent<OBBHull>());
+                            collisionHappened = newCollision.status;
+                            //Debug.Log(newCollision.contacts[0].normal);
+                            Debug.Log(newCollision.status);
+                            Debug.Log(newCollision.closingVelocity);
+                            //Debug.Log(newCollision.contacts[0].point);
+                            //Debug.Log(newCollision.closingVelocity);
+                        }
                         if (allColliders[i].hull == CollisionHull2D.hullType.OBB && allColliders[j].hull == CollisionHull2D.hullType.OBB)
                         {
                             newCollision = CollisionHull2D.OBBOBBCollision(allColliders[i].GetComponent<OBBHull>(), allColliders[j].GetComponent<OBBHull>());

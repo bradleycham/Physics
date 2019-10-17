@@ -194,17 +194,16 @@ public class CollisionHull2D : MonoBehaviour
         col.b = OBBHull;
         Vector3 range = (OBBHull.transform.position + OBBHull.offset) - (circleHull.transform.position + circleHull.offset);
 
-        Vector3 rotatedRange = getRotatedPoint(range, new Vector3 (0.0f,0.0f), OBBHull.currentRotation);// 2 circleHull.transform.position
+        Vector3 rotatedRange = getRotatedPoint(range, new Vector3 (0.0f,0.0f), -OBBHull.currentRotation);// 2 circleHull.transform.position
         Vector3 point = new Vector3(Mathf.Clamp(rotatedRange.x, -OBBHull.halfX, OBBHull.halfX), Mathf.Clamp(rotatedRange.y, -OBBHull.halfY, OBBHull.halfY));
+        //Debug.Log("range " + range);
+        //Debug.Log("rotrange " + rotatedRange);
 
         //float xOverlap = boxHull1.halfX + boxHull2.halfX - Mathf.Abs(range.x);
         //float yOverlap = boxHull1.halfY + boxHull2.halfY - Mathf.Abs(range.y);
 
-        //TRANSPORTATION
-
         //col.penetration = new Vector3(xOverlap, yOverlap);
 
-        //Vector3 closingVel = A.velocity - B.velocity;
         Vector3 closingVel = B.velocity - A.velocity;
         col.closingVelocity = closingVel;
 
@@ -212,9 +211,10 @@ public class CollisionHull2D : MonoBehaviour
         con0.point = new Vector3(Mathf.Clamp(range.x, -OBBHull.halfX, OBBHull.halfX), Mathf.Clamp(range.y, -OBBHull.halfY, OBBHull.halfY));
         con0.restitution = Mathf.Min(OBBHull.restitution, circleHull.restitution);
         con0.normal = range.normalized;
+        //Debug.Log("point " + point);
 
         col.status = false;
-        if ((range - point).magnitude < circleHull.radius)
+        if ((rotatedRange - point).magnitude - circleHull.radius < 0 )
         {
             col.status = true;
             col.contacts[0] = con0;
@@ -281,8 +281,10 @@ public class CollisionHull2D : MonoBehaviour
         return col;   
     }
     
-    public /*HullCollision*/ bool AABBOBBCollision(AABBHull AABBHull, OBBHull OBBHull)
+    public static HullCollision AABBOBBCollision(AABBHull AABBHull, OBBHull OBBHull)
     {
+        Particle2D A = AABBHull.GetComponent<Particle2D>();
+        Particle2D B = OBBHull.GetComponent<Particle2D>();
         Vector3[] shape1Corners;
         Vector3[] shape2Corners;
         shape1Corners = new Vector3[4];
@@ -291,18 +293,38 @@ public class CollisionHull2D : MonoBehaviour
         float[] shape1MinMax = new float[2];
         float[] shape2MinMax = new float[2];
 
-        shape1Corners[0] = AABBHull.transform.position + new Vector3(-AABBHull.halfX, -AABBHull.halfY);
-        shape1Corners[1] = AABBHull.transform.position + new Vector3(-AABBHull.halfX, AABBHull.halfY);
-        shape1Corners[2] = AABBHull.transform.position + new Vector3(AABBHull.halfX, -AABBHull.halfY);
-        shape1Corners[3] = AABBHull.transform.position + new Vector3(AABBHull.halfX, AABBHull.halfY);
+        shape1Corners[0] = AABBHull.transform.position - new Vector3(AABBHull.halfX, AABBHull.halfY) + AABBHull.offset;
+        shape1Corners[1] = AABBHull.transform.position - new Vector3(AABBHull.halfX, -AABBHull.halfY) + AABBHull.offset;
+        shape1Corners[2] = AABBHull.transform.position + new Vector3(AABBHull.halfX, AABBHull.halfY) + AABBHull.offset;
+        shape1Corners[3] = AABBHull.transform.position + new Vector3(AABBHull.halfX, -AABBHull.halfY) + AABBHull.offset;
         shape2Corners = getRotatedCorners(OBBHull);
 
-        normals[0] = getUpNormal(-AABBHull.transform.eulerAngles.z);
-        normals[1] = getRightNormal(-AABBHull.transform.eulerAngles.z);
+        normals[0] = new Vector3(0.0f, 1.0f, 0.0f);
+        normals[1] = new Vector3(1.0f, 0.0f, 0.0f);
         normals[2] = getUpNormal(-OBBHull.currentRotation);
         normals[3] = getRightNormal(-OBBHull.currentRotation);
 
-        for (int i = 0; i < normals.Length; i ++ )
+        HullCollision col = new HullCollision();
+        col.a = AABBHull;
+        col.b = OBBHull;
+        Vector3 range = (OBBHull.transform.position + OBBHull.offset) - (AABBHull.transform.position + AABBHull.offset);
+        //float xOverlap = boxHull1.halfX + boxHull2.halfX - Mathf.Abs(range.x);
+        //float yOverlap = boxHull1.halfY + boxHull2.halfY - Mathf.Abs(range.y);
+
+        //TRANSPORTATION
+
+        //col.penetration = new Vector3(xOverlap, yOverlap);
+
+        //Vector3 closingVel = A.velocity - B.velocity;
+        Vector3 closingVel = B.velocity - A.velocity;
+        col.closingVelocity = closingVel;
+
+        HullCollision.Contact con0 = new HullCollision.Contact();
+        con0.point = new Vector3(Mathf.Clamp(range.x, -AABBHull.halfX, AABBHull.halfX), Mathf.Clamp(range.y, -AABBHull.halfY, AABBHull.halfY));
+        con0.restitution = Mathf.Min(AABBHull.restitution, OBBHull.restitution);
+        con0.normal = range.normalized;
+
+        for (int i = 0; i < normals.Length; i++)
         {
             //Debug.Log("testing corner" + i);
 
@@ -311,13 +333,13 @@ public class CollisionHull2D : MonoBehaviour
             if (!Overlap(shape1MinMax[0], shape1MinMax[1], shape2MinMax[0], shape2MinMax[1]))
             {
                 //Debug.Log("falure");
-
-                return false;
-
+                col.status = false;
+                return col;
             }
         }
-
-        return true;
+        col.status = true;
+        col.contacts[0] = con0;
+        return col;
     }
     
     public static HullCollision OBBOBBCollision(OBBHull boxHull1, OBBHull boxHull2)

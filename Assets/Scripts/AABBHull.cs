@@ -8,8 +8,6 @@ public class AABBHull : CollisionHull2D
     public Vector3 offset;
     public float halfX;
     public float halfY;
-    public float startingRotation;
-
     private void Start()
     {
         hull = hullType.AABB;
